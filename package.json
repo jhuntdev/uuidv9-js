@@ -1,0 +1,44 @@
+{
+  "name": "uuid-v9",
+  "version": "0.4.5",
+  "description": "Fast, lightweight, zero-dependency JavaScript/TypeScript implementation of UUID version 9",
+  "homepage": "https://uuidv9.jhunt.dev",
+  "keywords": [
+    "uuid",
+    "uuid-v9",
+    "uuidv9",
+    "uuid9",
+    "prefix",
+    "sequential",
+    "non-sequential",
+    "timestamp",
+    "checksum",
+    "crc",
+    "javascript",
+    "typescript",
+    "nodejs",
+    "node.js"
+  ],
+  "main": "./dist/cjs/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.js"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jhuntdev/uuid-v9"
+  },
+  "scripts": {
+    "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
+    "watch": "tsc -w",
+    "test": "mocha ./test"
+  },
+  "author": "JHunt <mail@jhunt.dev>",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "10.2.0",
+    "typescript": "5.3.3"
+  }
+}
