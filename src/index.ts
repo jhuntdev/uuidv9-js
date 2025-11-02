@@ -1,6 +1,6 @@
-let nodeCrypto: typeof import('crypto') | undefined;
+let nodeCrypto:typeof import('crypto') | undefined
 try {
-  nodeCrypto = require('crypto');
+  nodeCrypto = require('crypto')
 } catch {}
 
 export const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
@@ -52,21 +52,35 @@ export const isValidUUIDv9 = (uuid:string, options:validateUUIDv9Options) => {
     )
 }
 
-const randomBytes = (count:number):string => {
-    if (nodeCrypto && typeof nodeCrypto.randomBytes === 'function') {
-        return nodeCrypto.randomBytes(count).toString('hex');
-    } else if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-        const bytes = new Uint8Array(count);
-        crypto.getRandomValues(bytes);
-        return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
-    } else {
-        let str = '';
-        for (let i = 0; i < count; i++) {
-            const r = (Math.random() * 256) | 0;
-            str += r.toString(16).padStart(2, '0');
-        }
-        return str;
+const randomBytes = (length:number):string => {
+    let array
+    // Deno and browsers
+    if (typeof globalThis.crypto?.getRandomValues === "function") {
+        array = new Uint8Array(length)
+        globalThis.crypto.getRandomValues(array)
     }
+    // Node
+    else if (typeof nodeCrypto?.randomBytes === 'function') {
+        array = nodeCrypto.randomBytes(length)
+    }
+    // Bun
+    // @ts-expect-error
+    else if (typeof Bun !== 'undefined' && typeof Bun.random === 'function') {
+        // @ts-expect-error
+        array = Bun.random(length)
+    }
+    // Fallback
+    else {
+        array = new Uint8Array(length)
+        for (let i = 0; i < length; i++) {
+            array[i] = Math.floor(Math.random() * 256)
+        }
+    }
+    let string = ''
+    for (const b of array) {
+        string += b.toString(16).padStart(2, '0')
+    }
+    return string
 }
 
 const randomChar = (chars:string):string => {
@@ -148,13 +162,3 @@ export const uuidv9 = (options?:UUIDv9Options) => {
     }
     return addDashes(joined)
 }
-
-const defaultExport = {
-    uuidv9,
-    isValidUUIDv9,
-    isUUID,
-    verifyChecksum,
-    checkVersion
-}
-
-export default defaultExport

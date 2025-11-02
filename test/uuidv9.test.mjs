@@ -1,18 +1,10 @@
-// const assert = require('assert')
-// const {
-//     uuidv9,
-//     isValidUUIDv9,
-//     verifyChecksum,
-//     isUUID
-// } = require('../dist/cjs')
-
 import assert from 'assert'
 import {
     uuidv9,
     isValidUUIDv9,
     verifyChecksum,
     isUUID
-} from '../dist/esm/index.js'
+} from '../dist/index.js'
 
 const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 const uuidV1Regex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-1[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/

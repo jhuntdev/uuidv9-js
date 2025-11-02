@@ -16,11 +16,4 @@ interface UUIDv9Options {
     legacy?: boolean;
 }
 export declare const uuidv9: (options?: UUIDv9Options) => string;
-declare const defaultExport: {
-    uuidv9: (options?: UUIDv9Options) => string;
-    isValidUUIDv9: (uuid: string, options: validateUUIDv9Options) => boolean;
-    isUUID: (uuid: string) => boolean;
-    verifyChecksum: (uuid: string) => boolean;
-    checkVersion: (uuid: string, version?: number) => boolean;
-};
-export default defaultExport;
+export {};
