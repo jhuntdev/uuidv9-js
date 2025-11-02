@@ -1,6 +1,6 @@
 {
   "name": "uuid-v9",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "Fast, lightweight, zero-dependency JavaScript/TypeScript implementation of UUID version 9",
   "homepage": "https://uuidv9.jhunt.dev",
   "keywords": [
