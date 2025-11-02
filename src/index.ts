@@ -1,3 +1,8 @@
+let nodeCrypto: typeof import('crypto') | undefined;
+try {
+  nodeCrypto = require('crypto');
+} catch {}
+
 export const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
 const calcChecksum = (hexString:string):string => { // CRC-8
@@ -48,12 +53,20 @@ export const isValidUUIDv9 = (uuid:string, options:validateUUIDv9Options) => {
 }
 
 const randomBytes = (count:number):string => {
-    let str = ''
-    for (let i = 0; i < count; i++) {
-        const r = (Math.random() * 16) | 0;
-        str += r.toString(16)
+    if (nodeCrypto && typeof nodeCrypto.randomBytes === 'function') {
+        return nodeCrypto.randomBytes(count).toString('hex');
+    } else if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const bytes = new Uint8Array(count);
+        crypto.getRandomValues(bytes);
+        return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    } else {
+        let str = '';
+        for (let i = 0; i < count; i++) {
+            const r = (Math.random() * 256) | 0;
+            str += r.toString(16).padStart(2, '0');
+        }
+        return str;
     }
-    return str
 }
 
 const randomChar = (chars:string):string => {
@@ -70,12 +83,19 @@ const validatePrefix = (prefix:string):void => {
     if (!isBase16(prefix)) throw new Error('Prefix must be only hexadecimal characters')
 }
 
+const validateSuffix = (suffix:string):void => {
+    if (typeof suffix !== 'string') throw new Error('Suffix must be a string')
+    if (suffix.length > 4) throw new Error('Suffix must be no more than 4 characters')
+    if (!isBase16(suffix)) throw new Error('Suffix must be only hexadecimal characters')
+}
+
 const addDashes = (str:string):string => {
     return `${str.substring(0, 8)}-${str.substring(8, 12)}-${str.substring(12, 16)}-${str.substring(16, 20)}-${str.substring(20)}`
 }
 
 interface UUIDv9Options {
     prefix?:string
+    suffix?:string
     timestamp?:boolean|number|string|Date
     checksum?:boolean
     version?:boolean
@@ -84,13 +104,14 @@ interface UUIDv9Options {
 
 const defaultOptions = {
     prefix: '',
+    suffix: '',
     timestamp: true,
     checksum: false,
     version: false,
     legacy: false
 }
 
-const optionOrDefault = (name:'prefix'|'timestamp'|'checksum'|'version'|'legacy', options?:UUIDv9Options) => {
+const optionOrDefault = (name:'prefix'|'suffix'|'timestamp'|'checksum'|'version'|'legacy', options?:UUIDv9Options) => {
     if (!options || options[name] === undefined) {
         return defaultOptions[name]
     } else {
@@ -100,6 +121,7 @@ const optionOrDefault = (name:'prefix'|'timestamp'|'checksum'|'version'|'legacy'
 
 export const uuidv9 = (options?:UUIDv9Options) => {
     let prefix = String(optionOrDefault('prefix', options))
+    let suffix = String(optionOrDefault('suffix', options))
     let timestamp = optionOrDefault('timestamp', options)
     let checksum = optionOrDefault('checksum', options)
     let version = optionOrDefault('version', options)
@@ -108,9 +130,14 @@ export const uuidv9 = (options?:UUIDv9Options) => {
         validatePrefix(prefix)
         prefix = prefix.toLowerCase()
     }
+    if (suffix) {
+        validateSuffix(suffix)
+        suffix = suffix.toLowerCase()
+    }
     const center:string = timestamp instanceof Date ? timestamp.getTime().toString(16) : typeof timestamp === 'number' || typeof timestamp === 'string' ? new Date(timestamp).getTime().toString(16) : timestamp ? new Date().getTime().toString(16) : ''
-    const suffix:string = randomBytes(32 - prefix.length - center.length - (checksum ? 2 : 0) - (legacy ? 2 : version ? 1 : 0))
-    let joined:string = prefix + center + suffix
+    const randomLength = 32 - prefix.length - center.length - suffix.length - (checksum ? 2 : 0) - (legacy ? 2 : version ? 1 : 0)
+    const random:string = randomBytes(Math.ceil(randomLength/2)).slice(0, randomLength)
+    let joined:string = prefix + center + random + suffix
     if (legacy) {
         joined = joined.substring(0, 12) + (timestamp ? '1' : '4') + joined.substring(12, 15) + randomChar('89ab') + joined.substring(15)
     } else if (version) {
@@ -122,10 +149,12 @@ export const uuidv9 = (options?:UUIDv9Options) => {
     return addDashes(joined)
 }
 
-export default {
+const defaultExport = {
     uuidv9,
     isValidUUIDv9,
     isUUID,
     verifyChecksum,
     checkVersion
 }
+
+export default defaultExport

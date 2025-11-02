@@ -10,6 +10,11 @@
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.uuidv9 = exports.isValidUUIDv9 = exports.isUUID = exports.checkVersion = exports.verifyChecksum = exports.uuidRegex = void 0;
+    let nodeCrypto;
+    try {
+        nodeCrypto = require('crypto');
+    }
+    catch (_a) { }
     exports.uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
     const calcChecksum = (hexString) => {
         const data = hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
@@ -50,12 +55,22 @@
     };
     exports.isValidUUIDv9 = isValidUUIDv9;
     const randomBytes = (count) => {
-        let str = '';
-        for (let i = 0; i < count; i++) {
-            const r = (Math.random() * 16) | 0;
-            str += r.toString(16);
+        if (nodeCrypto && typeof nodeCrypto.randomBytes === 'function') {
+            return nodeCrypto.randomBytes(count).toString('hex');
         }
-        return str;
+        else if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            const bytes = new Uint8Array(count);
+            crypto.getRandomValues(bytes);
+            return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+        }
+        else {
+            let str = '';
+            for (let i = 0; i < count; i++) {
+                const r = (Math.random() * 256) | 0;
+                str += r.toString(16).padStart(2, '0');
+            }
+            return str;
+        }
     };
     const randomChar = (chars) => {
         const randomIndex = Math.floor(Math.random() * chars.length);
@@ -71,11 +86,20 @@
         if (!isBase16(prefix))
             throw new Error('Prefix must be only hexadecimal characters');
     };
+    const validateSuffix = (suffix) => {
+        if (typeof suffix !== 'string')
+            throw new Error('Suffix must be a string');
+        if (suffix.length > 4)
+            throw new Error('Suffix must be no more than 4 characters');
+        if (!isBase16(suffix))
+            throw new Error('Suffix must be only hexadecimal characters');
+    };
     const addDashes = (str) => {
         return `${str.substring(0, 8)}-${str.substring(8, 12)}-${str.substring(12, 16)}-${str.substring(16, 20)}-${str.substring(20)}`;
     };
     const defaultOptions = {
         prefix: '',
+        suffix: '',
         timestamp: true,
         checksum: false,
         version: false,
@@ -91,6 +115,7 @@
     };
     const uuidv9 = (options) => {
         let prefix = String(optionOrDefault('prefix', options));
+        let suffix = String(optionOrDefault('suffix', options));
         let timestamp = optionOrDefault('timestamp', options);
         let checksum = optionOrDefault('checksum', options);
         let version = optionOrDefault('version', options);
@@ -99,9 +124,14 @@
             validatePrefix(prefix);
             prefix = prefix.toLowerCase();
         }
+        if (suffix) {
+            validateSuffix(suffix);
+            suffix = suffix.toLowerCase();
+        }
         const center = timestamp instanceof Date ? timestamp.getTime().toString(16) : typeof timestamp === 'number' || typeof timestamp === 'string' ? new Date(timestamp).getTime().toString(16) : timestamp ? new Date().getTime().toString(16) : '';
-        const suffix = randomBytes(32 - prefix.length - center.length - (checksum ? 2 : 0) - (legacy ? 2 : version ? 1 : 0));
-        let joined = prefix + center + suffix;
+        const randomLength = 32 - prefix.length - center.length - suffix.length - (checksum ? 2 : 0) - (legacy ? 2 : version ? 1 : 0);
+        const random = randomBytes(Math.ceil(randomLength / 2)).slice(0, randomLength);
+        let joined = prefix + center + random + suffix;
         if (legacy) {
             joined = joined.substring(0, 12) + (timestamp ? '1' : '4') + joined.substring(12, 15) + randomChar('89ab') + joined.substring(15);
         }
@@ -114,11 +144,12 @@
         return addDashes(joined);
     };
     exports.uuidv9 = uuidv9;
-    exports.default = {
+    const defaultExport = {
         uuidv9: exports.uuidv9,
         isValidUUIDv9: exports.isValidUUIDv9,
         isUUID: exports.isUUID,
         verifyChecksum: exports.verifyChecksum,
         checkVersion: exports.checkVersion
     };
+    exports.default = defaultExport;
 });
