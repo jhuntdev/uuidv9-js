@@ -134,6 +134,7 @@ const optionOrDefault = (name:'prefix'|'suffix'|'timestamp'|'checksum'|'version'
 }
 
 export const uuidv9 = (options?:UUIDv9Options) => {
+    if (options && typeof options !== 'object') throw new Error('uuidv9 options argument must be an object')
     let prefix = String(optionOrDefault('prefix', options))
     let suffix = String(optionOrDefault('suffix', options))
     let timestamp = optionOrDefault('timestamp', options)

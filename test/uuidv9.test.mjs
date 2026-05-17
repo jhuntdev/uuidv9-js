@@ -124,4 +124,7 @@ describe('uuid-v9', () => {
         assert.strictEqual(verifyChecksum(id6), true)
         assert.strictEqual(verifyChecksum(id7), true)
     })
+    it('should throw error with bad options', async () => {
+        assert.throws(() => uuidv9('a1b2c3d4'))
+    })
 })
