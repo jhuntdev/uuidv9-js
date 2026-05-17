@@ -50,3 +50,5 @@ _*Legacy mode adds version and variant digits to immitate v1 or v4 UUIDs dependi
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+<><
