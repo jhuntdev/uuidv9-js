@@ -2,7 +2,7 @@
 
 ## Fast, lightweight, zero-dependency JavaScript/TypeScript implementation of UUID version 9
 
-The v9 UUID supports both sequential (time-based) and non-sequential (random) UUIDs with an optional prefix of up to four bytes, an optional checksum, and sufficient randomness to avoid collisions. It uses the UNIX timestamp for sequential UUIDs and CRC-8 for checksums. A version digit can be added if desired, but is omitted by default.
+The v9 UUID supports both sequential (time-based) and non-sequential (random) UUIDs with an optional prefix of up to four bytes, an optional checksum, and sufficient randomness to avoid collisions. It uses the UNIX timestamp for sequential UUIDs and CRC-8 for checksums. The version can be added if desired, but is omitted by default.
 
 To learn more about UUID v9, please visit the website: https://uuidv9.jhunt.dev
 

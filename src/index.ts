@@ -149,13 +149,13 @@ export const uuidv9 = (options?:UUIDv9Options) => {
         suffix = suffix.toLowerCase()
     }
     const center:string = timestamp instanceof Date ? timestamp.getTime().toString(16) : typeof timestamp === 'number' || typeof timestamp === 'string' ? new Date(timestamp).getTime().toString(16) : timestamp ? new Date().getTime().toString(16) : ''
-    const randomLength = 32 - prefix.length - center.length - suffix.length - (checksum ? 2 : 0) - (legacy ? 2 : version ? 1 : 0)
+    const randomLength = 32 - prefix.length - center.length - suffix.length - (checksum ? 2 : 0) - (legacy || version ? 2 : 0) // (legacy ? 2 : version ? 1 : 0)
     const random:string = randomBytes(Math.ceil(randomLength/2)).slice(0, randomLength)
     let joined:string = prefix + center + random + suffix
     if (legacy) {
         joined = joined.substring(0, 12) + (timestamp ? '1' : '4') + joined.substring(12, 15) + randomChar('89ab') + joined.substring(15)
     } else if (version) {
-        joined = joined.substring(0, 12) + '9' + joined.substring(12)
+        joined = joined.substring(0, 12) + '9' + joined.substring(12, 15) + randomChar('89ab') + joined.substring(15) // + joined.substring(12)
     }
     if (checksum) {
         joined += calcChecksum(joined)
