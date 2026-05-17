@@ -31,8 +31,7 @@ const verifyChecksum = (uuid) => {
 const checkVersion = (uuid, version) => {
     const versionDigit = uuid.slice(14, 15);
     const variantDigit = uuid.slice(19, 20);
-    return ((!version || versionDigit === String(version)) &&
-        (versionDigit === '9' || ('14'.indexOf(String(versionDigit)) > -1 && '89abAB'.indexOf(variantDigit) > -1)));
+    return (!version || (versionDigit === String(version) && '89abAB'.indexOf(variantDigit) > -1));
 };
 const isUUID = (uuid) => typeof uuid === 'string' && uuidRegex.test(uuid);
 const isValidUUIDv9 = (uuid, options) => {
@@ -98,11 +97,11 @@ const addDashes = (str) => {
 };
 const defaultOptions = {
     prefix: '',
-    suffix: '',
     timestamp: true,
     checksum: false,
     version: false,
-    legacy: false
+    legacy: false,
+    suffix: ''
 };
 const optionOrDefault = (name, options) => {
     if (!options || options[name] === undefined) {

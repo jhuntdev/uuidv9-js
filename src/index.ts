@@ -32,8 +32,7 @@ export const checkVersion = (uuid:string, version?:number) => {
     const versionDigit = uuid.slice(14, 15)
     const variantDigit = uuid.slice(19, 20)
     return (
-        (!version || versionDigit === String(version)) &&
-        (versionDigit === '9' || ('14'.indexOf(String(versionDigit)) > -1 && '89abAB'.indexOf(variantDigit) > -1))
+        !version || (versionDigit === String(version) && '89abAB'.indexOf(variantDigit) > -1)
     )
 }
 
@@ -109,20 +108,20 @@ const addDashes = (str:string):string => {
 
 interface UUIDv9Options {
     prefix?:string
-    suffix?:string
     timestamp?:boolean|number|string|Date
     checksum?:boolean
     version?:boolean
     legacy?:boolean
+    suffix?:string
 }
 
 const defaultOptions = {
     prefix: '',
-    suffix: '',
     timestamp: true,
     checksum: false,
     version: false,
-    legacy: false
+    legacy: false,
+    suffix: ''
 }
 
 const optionOrDefault = (name:'prefix'|'suffix'|'timestamp'|'checksum'|'version'|'legacy', options?:UUIDv9Options) => {

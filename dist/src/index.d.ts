@@ -9,11 +9,11 @@ interface validateUUIDv9Options {
 export declare const isValidUUIDv9: (uuid: string, options: validateUUIDv9Options) => boolean;
 interface UUIDv9Options {
     prefix?: string;
-    suffix?: string;
     timestamp?: boolean | number | string | Date;
     checksum?: boolean;
     version?: boolean;
     legacy?: boolean;
+    suffix?: string;
 }
 export declare const uuidv9: (options?: UUIDv9Options) => string;
 export {};
